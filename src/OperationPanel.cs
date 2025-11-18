@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Forms;
 using System.Windows.Forms.Automation;
 namespace HearthstoneAccessPatcher;
@@ -61,11 +62,13 @@ public class OperationPanel : FlowLayoutPanel
         UpdateVisibility();
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ProgressBar ProgressBar
     {
         get { return progressBar; }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string LabelText
     {
         get { return label.Text; }
