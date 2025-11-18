@@ -15,6 +15,6 @@ public static class SourceManager
 {
     static public Source[] Sources = new Source[]{
         new Source("Default.", "https://hearthstoneaccess.com/files/pre_patch.zip"),
-        new Source("Battlegrounds Duos (BETA).", "https://hearthstoneaccess.com/files/duos_beta_patch.zip"),
+        new Source("Underground Arena Support (Experimental).", "https://hearthstoneaccess.com/api/v1/release-channels/underground/download-latest"),
     };
 }
