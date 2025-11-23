@@ -31,7 +31,7 @@ static class Program
 
     private static void LogException(Exception ex)
     {
-        string filePath = "errors.log";
+        string filePath = Constants.ErrorLogFile;
         using (StreamWriter writer = new(filePath, false))
         {
             writer.WriteLine($"Date : {DateTime.Now.ToString()}");
