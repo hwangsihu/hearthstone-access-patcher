@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 namespace HearthstoneAccessPatcher;
 public class Downloader
 {
-    private const int bufferSize = 65536;
     public event EventHandler<int>? ProgressChanged;
     public int Progress { get; private set; }
     private int lastPercent;
@@ -26,7 +25,7 @@ public class Downloader
         length = response.Content.Headers.ContentLength ?? -1L;
         MemoryStream memoryStream = new MemoryStream();
         using var stream = await response.Content.ReadAsStreamAsync();
-        byte[] buffer = new byte[bufferSize];
+        byte[] buffer = new byte[Constants.DownloadBufferSize];
         int read;
         while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
