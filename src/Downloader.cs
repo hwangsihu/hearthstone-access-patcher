@@ -34,32 +34,43 @@ public class Downloader
     }
 
     /// <summary>
-    /// Downloads the file from the URL to a MemoryStream
+    /// Downloads the file from the URL to a temporary FileStream
     /// </summary>
     /// <returns>
-    /// A MemoryStream containing the downloaded content with position reset to 0.
-    /// IMPORTANT: The caller is responsible for disposing the returned MemoryStream.
+    /// A FileStream containing the downloaded content with position reset to 0.
+    /// The file is created in the system's temporary directory and will be deleted when the stream is disposed.
+    /// IMPORTANT: The caller is responsible for disposing the returned FileStream.
     /// </returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails</exception>
-    async public Task<MemoryStream> Download()
+    async public Task<FileStream> Download()
     {
         using HttpClient client = new HttpClient();
         using HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         length = response.Content.Headers.ContentLength ?? -1L;
-        MemoryStream memoryStream = new MemoryStream();
+
+        // Create a temporary file that will be deleted when the FileStream is disposed
+        string tempFile = Path.GetTempFileName();
+        FileStream fileStream = new FileStream(
+            tempFile,
+            FileMode.Create,
+            FileAccess.ReadWrite,
+            FileShare.None,
+            Constants.DownloadBufferSize,
+            FileOptions.DeleteOnClose);
+
         using var stream = await response.Content.ReadAsStreamAsync();
         byte[] buffer = new byte[Constants.DownloadBufferSize];
         int read;
         while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
             downloaded += read;
-            memoryStream.Write(new ReadOnlySpan<byte>(buffer, 0, read));
+            await fileStream.WriteAsync(buffer, 0, read);
             ReportProgress();
         }
 
-        memoryStream.Position = 0;
-        return memoryStream;
+        fileStream.Position = 0;
+        return fileStream;
     }
 
     private void ReportProgress()
