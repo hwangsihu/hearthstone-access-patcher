@@ -46,7 +46,7 @@ public class MainForm : Form
         directoryBox.ReadOnly = true;
 
         Button btnBrowse = new Button();
-        btnBrowse.Text = "Change:";
+        btnBrowse.Text = "Browse for Folder...";
         btnBrowse.AutoSize = true;
         btnBrowse.Click += (s, e) =>
         {
