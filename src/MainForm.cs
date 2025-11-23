@@ -129,25 +129,65 @@ public class MainForm : Form
 
         // Disable Start button to prevent multiple clicks
         btnStart.Enabled = false;
-        operationPanel.AddHistoryItem($"Selected HearthstoneDirectory: {directory}");
-        operationPanel.AddHistoryItem($"Selected channel: {source.name}, at {source.url}");
-        operationPanel.LabelText = "Downloading...";
-        Downloader downloader = new Downloader(source.url);
 
-        downloader.ProgressChanged += (sender, progress) =>
+        try
         {
-            operationPanel.UpdateProgress(progress, "Downloading...");
-        };
-        using Stream stream = await downloader.Download();
-        operationPanel.LabelText= "Patching...";
-        await Task.Yield();
-        Patcher.UnpackAndPatch(stream, directory);
+            operationPanel.AddHistoryItem($"Selected HearthstoneDirectory: {directory}");
+            operationPanel.AddHistoryItem($"Selected channel: {source.name}, at {source.url}");
+            operationPanel.LabelText = "Downloading...";
+            Downloader downloader = new Downloader(source.url);
 
-        operationPanel.LabelText = "Done.";
-        // Re-enable Start button
-        btnStart.Enabled = true;
+            downloader.ProgressChanged += (sender, progress) =>
+            {
+                operationPanel.UpdateProgress(progress, "Downloading...");
+            };
+            using Stream stream = await downloader.Download();
+            operationPanel.LabelText = "Patching...";
+            await Task.Yield();
+            Patcher.UnpackAndPatch(stream, directory);
 
-        MessageBox.Show("Hearthstone patched!", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            operationPanel.LabelText = "Done.";
+            MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (IOException)
+        {
+            operationPanel.LabelText = "Error during patching.";
+            string message = "There was an error patching your game. Please make sure Hearthstone is closed and try again.";
+            MessageBox.Show(this, message, "Patching Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            operationPanel.LabelText = "Error: Permission denied.";
+            string message = "Permission denied while patching. Please make sure:\n\n" +
+                           "• Hearthstone is closed\n" +
+                           "• You have permission to write to the Hearthstone folder\n" +
+                           "• Try running this program as Administrator";
+            MessageBox.Show(this, message, "Permission Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (System.Net.Http.HttpRequestException)
+        {
+            operationPanel.LabelText = "Error downloading patch.";
+            string message = "Failed to download the patch. Please check your internet connection and try again.";
+            MessageBox.Show(this, message, "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (InvalidDataException)
+        {
+            operationPanel.LabelText = "Error: Invalid patch file.";
+            string message = "The downloaded patch file is invalid or corrupted. Please try again.";
+            MessageBox.Show(this, message, "Invalid Patch File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        catch (Exception ex)
+        {
+            operationPanel.LabelText = "Unexpected error occurred.";
+            string message = "An unexpected error occurred while patching. Please try again.\n\n" +
+                           $"If the problem persists, please report this error:\n{ex.Message}";
+            MessageBox.Show(this, message, "Unexpected Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            // Re-enable Start button
+            btnStart.Enabled = true;
+        }
     }
 
     private async void LoadChannelsAsync()
