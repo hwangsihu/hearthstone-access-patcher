@@ -90,6 +90,12 @@ public class OperationPanel : FlowLayoutPanel
 
     public void UpdateProgress(int progressValue, string? text = null)
     {
+        if (InvokeRequired)
+        {
+            Invoke(new Action(() => UpdateProgress(progressValue, text)));
+            return;
+        }
+
         if (text != null)
         {
             LabelText = text;
@@ -98,7 +104,6 @@ public class OperationPanel : FlowLayoutPanel
         {
             progressBar.Value = progressValue;
         }
-
     }
 
     private void UpdateVisibility()
