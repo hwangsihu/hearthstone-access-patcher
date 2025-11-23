@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 namespace HearthstoneAccessPatcher;
