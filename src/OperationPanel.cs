@@ -28,7 +28,8 @@ public class OperationPanel : FlowLayoutPanel
         label = new Label
         {
             Text = "Operation Status",
-            AutoSize = true
+            AutoSize = true,
+            AccessibleRole = AccessibleRole.None
         };
 
         listBox = new ListBox
