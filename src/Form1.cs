@@ -14,6 +14,7 @@ public class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
+        LoadChannelsAsync();
     }
 
     private void InitializeComponent()
@@ -83,10 +84,7 @@ public class MainForm : Form
         cmbChannels.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbChannels.Width = 200;
 
-        foreach (Source source in SourceManager.Sources)
-        {
-            cmbChannels.Items.Add(source.name);
-        }
+        PopulateChannels();
 
         comboPanel.Controls.Add(lblSelect);
         comboPanel.Controls.Add(cmbChannels);
@@ -111,9 +109,6 @@ public class MainForm : Form
         {
             MessageBox.Show(this, "Could not automatically locate where Hearthstone is installed to apply the patch. On the next screen, please press on the 'change' button and pick where you've installed Hearthstone by choosing the Hearthstone folder.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
-
-        cmbChannels.SelectedIndex = 0;
-
     }
 
     private async void BtnStart_Click(object? sender, EventArgs e)
@@ -153,5 +148,46 @@ public class MainForm : Form
         btnStart.Enabled = true;
 
         MessageBox.Show("Hearthstone patched!", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private async void LoadChannelsAsync()
+    {
+        bool success = await SourceManager.LoadChannelsAsync();
+
+        if (success && cmbChannels != null)
+        {
+            if (cmbChannels.InvokeRequired)
+            {
+                cmbChannels.Invoke(new Action(() => PopulateChannels()));
+            }
+            else
+            {
+                PopulateChannels();
+            }
+        }
+    }
+
+    private void PopulateChannels()
+    {
+        int previousSelection = cmbChannels.SelectedIndex;
+
+        cmbChannels.Items.Clear();
+
+        foreach (Source source in SourceManager.Sources)
+        {
+            cmbChannels.Items.Add($"{source.name} - {source.description}");
+        }
+
+        if (cmbChannels.Items.Count > 0)
+        {
+            if (previousSelection >= 0 && previousSelection < cmbChannels.Items.Count)
+            {
+                cmbChannels.SelectedIndex = previousSelection;
+            }
+            else
+            {
+                cmbChannels.SelectedIndex = 0;
+            }
+        }
     }
 }
