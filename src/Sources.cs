@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -97,8 +98,11 @@ public static class SourceManager
 
             return false;
         }
-        catch
+        catch (Exception ex)
         {
+            // Log the exception for debugging purposes
+            Debug.WriteLine($"Failed to load channels from API: {ex.GetType().Name} - {ex.Message}");
+            // Fallback sources will be used automatically since Sources is already initialized to FallbackSources
             return false;
         }
     }
