@@ -4,13 +4,12 @@ using System.IO.Compression;
 namespace HearthstoneAccessPatcher;
 static class Patcher
 {
-    const string PATCH_DIR = "patch/";
 
     public static bool IsHsDirectory(string? directory)
     {
         if (string.IsNullOrWhiteSpace(directory)) return false;
         directory = Path.GetFullPath(directory);
-        if (Directory.Exists(directory) && Path.GetFileName(directory) == "Hearthstone" && File.Exists(Path.Combine(directory, "Hearthstone_Data", "Managed", "Assembly-CSharp.dll")))
+        if (Directory.Exists(directory) && Path.GetFileName(directory) == "Hearthstone" && File.Exists(Path.Combine(directory, Constants.HearthstoneAssemblyPath)))
         {
             return true;
         }
@@ -48,8 +47,8 @@ static class Patcher
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             string entryPath = entry.FullName;
-            if (String.IsNullOrWhiteSpace(entryPath) || entryPath.EndsWith('/') || !entryPath.StartsWith(PATCH_DIR, StringComparison.OrdinalIgnoreCase)) continue;
-            entryPath = entry.FullName.Substring(PATCH_DIR.Length);
+            if (String.IsNullOrWhiteSpace(entryPath) || entryPath.EndsWith('/') || !entryPath.StartsWith(Constants.PatchDirectory, StringComparison.OrdinalIgnoreCase)) continue;
+            entryPath = entry.FullName.Substring(Constants.PatchDirectory.Length);
             entryPath = Path.Join(entryPath.Split('/'));
             entryPath = Path.Join(directory, entryPath);
             string? entryDirectory = Path.GetDirectoryName(entryPath)!;
