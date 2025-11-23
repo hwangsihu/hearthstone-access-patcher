@@ -19,17 +19,17 @@ static class Program
 
     private static void HandleDomainException(object sender, UnhandledExceptionEventArgs e)
     {
-        logException((Exception)e.ExceptionObject);
+        LogException((Exception)e.ExceptionObject);
         Application.Exit();
     }
 
     private static void HandleThreadException(object sender, ThreadExceptionEventArgs e)
     {
-        logException(e.Exception);
+        LogException(e.Exception);
         Application.Exit();
     }
 
-    private static void logException(Exception ex)
+    private static void LogException(Exception ex)
     {
         string filePath = "errors.log";
         using (StreamWriter writer = new(filePath, false))
