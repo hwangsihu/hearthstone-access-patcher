@@ -29,7 +29,7 @@ public class OperationPanel : FlowLayoutPanel
         {
             Text = "Operation Status",
             AutoSize = true,
-            AccessibleRole = AccessibleRole.None
+            Visible = false  // Hidden - status shown in history ListBox and announced via automation
         };
 
         listBox = new ListBox
