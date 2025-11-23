@@ -18,7 +18,7 @@ To use the patcher, download the latest executable from the [latest release page
 Make sure you have the following dependencies installed and available on your system:
 * [Git](https://git-scm.com/): any recent version
 * [GitHub CLI](https://cli.github.com/) (optional): any recent version
-* .NET 8 sdk, either from [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download) or install using visual studio.
+* .NET 10 sdk, either from [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download) or install using visual studio.
 
 ### Clone the Repo
 With Git:
