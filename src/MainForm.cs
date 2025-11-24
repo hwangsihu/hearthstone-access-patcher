@@ -8,6 +8,7 @@ public class MainForm : Form
     private TextBox directoryBox = null!;
     private ComboBox cmbChannels = null!;
     private Button btnStart = null!;
+    private Button btnExit = null!;
     private FlowLayoutPanel mainPanel = null!;
     private OperationPanel operationPanel = null!;
     private bool isOperationInProgress = false;
@@ -54,6 +55,7 @@ public class MainForm : Form
     {
         cmbChannels = new ComboBox();
         btnStart = new Button();
+        btnExit = new Button();
         mainPanel = new FlowLayoutPanel();
 
         this.Text = "HearthstoneAccessPatcher";
@@ -122,13 +124,26 @@ public class MainForm : Form
         comboPanel.Controls.Add(lblSelect);
         comboPanel.Controls.Add(cmbChannels);
 
+        FlowLayoutPanel buttonPanel = new FlowLayoutPanel();
+        buttonPanel.FlowDirection = FlowDirection.LeftToRight;
+        buttonPanel.AutoSize = true;
+        buttonPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        buttonPanel.Margin = new Padding(0, 10, 0, 0); // Add top margin for spacing
+
         btnStart.Text = "Patch Hearthstone";
         btnStart.AutoSize = true;
-        btnStart.Margin = new Padding(0, 10, 0, 0); // Add top margin for spacing
         btnStart.Click += BtnStart_Click;
 
+        btnExit.Text = "Exit";
+        btnExit.AutoSize = true;
+        btnExit.Margin = new Padding(5, 0, 0, 0); // Add left margin for spacing between buttons
+        btnExit.Click += (s, e) => this.Close();
+
+        buttonPanel.Controls.Add(btnStart);
+        buttonPanel.Controls.Add(btnExit);
+
         mainPanel.Controls.Add(comboPanel);
-        mainPanel.Controls.Add(btnStart);
+        mainPanel.Controls.Add(buttonPanel);
         operationPanel = new OperationPanel();
 
         mainPanel.Controls.Add(operationPanel);
