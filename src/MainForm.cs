@@ -122,7 +122,7 @@ public class MainForm : Form
         comboPanel.Controls.Add(lblSelect);
         comboPanel.Controls.Add(cmbChannels);
 
-        btnStart.Text = "Start";
+        btnStart.Text = "Patch Hearthstone";
         btnStart.AutoSize = true;
         btnStart.Margin = new Padding(0, 10, 0, 0); // Add top margin for spacing
         btnStart.Click += BtnStart_Click;
@@ -168,7 +168,7 @@ public class MainForm : Form
 
         // Mark operation as in progress
         isOperationInProgress = true;
-        btnStart.Text = "Patching...";
+        btnStart.Text = "Patching Hearthstone...";
 
         try
         {
@@ -260,7 +260,7 @@ public class MainForm : Form
         {
             // Reset button state
             isOperationInProgress = false;
-            btnStart.Text = "Start";
+            btnStart.Text = "Patch Hearthstone";
         }
     }
 
