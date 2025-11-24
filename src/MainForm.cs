@@ -132,8 +132,6 @@ public class MainForm : Form
 
         try
         {
-            operationPanel.AddHistoryItem($"Selected HearthstoneDirectory: {directory}");
-            operationPanel.AddHistoryItem($"Selected channel: {source.name}, at {source.url}");
             operationPanel.LabelText = "Downloading...";
             Downloader downloader = new Downloader(source.url);
 
