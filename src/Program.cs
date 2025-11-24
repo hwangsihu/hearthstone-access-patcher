@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -34,7 +35,7 @@ static class Program
         string filePath = Constants.ErrorLogFile;
         using (StreamWriter writer = new(filePath, false))
         {
-            writer.WriteLine($"Date : {DateTime.Now.ToString()}");
+            writer.WriteLine($"Date : {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}");
             Exception? ex_chain = ex;
             while (ex_chain != null)
             {
