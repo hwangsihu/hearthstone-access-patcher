@@ -63,9 +63,12 @@ public class OperationPanel : FlowLayoutPanel
         {
             LabelText = text;
         }
-        if (progressValue != progressBar.Value)
+
+        // Clamp progress value to valid range
+        int clampedValue = Math.Clamp(progressValue, progressBar.Minimum, progressBar.Maximum);
+        if (clampedValue != progressBar.Value)
         {
-            progressBar.Value = progressValue;
+            progressBar.Value = clampedValue;
         }
     }
 }
