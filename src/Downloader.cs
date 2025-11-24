@@ -58,25 +58,38 @@ public class Downloader
 
         // Create a temporary file
         TempFilePath = Path.GetTempFileName();
-        FileStream fileStream = new FileStream(
-            TempFilePath,
-            FileMode.Create,
-            FileAccess.ReadWrite,
-            FileShare.None,
-            Constants.DownloadBufferSize);
-
-        using var stream = await response.Content.ReadAsStreamAsync();
-        byte[] buffer = new byte[Constants.DownloadBufferSize];
-        int read;
-        while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+        FileStream? fileStream = null;
+        try
         {
-            downloaded += read;
-            await fileStream.WriteAsync(buffer, 0, read);
-            ReportProgress();
-        }
+            fileStream = new FileStream(
+                TempFilePath,
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                Constants.DownloadBufferSize);
 
-        fileStream.Position = 0;
-        return fileStream;
+            using var stream = await response.Content.ReadAsStreamAsync();
+            byte[] buffer = new byte[Constants.DownloadBufferSize];
+            int read;
+            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+            {
+                downloaded += read;
+                await fileStream.WriteAsync(buffer, 0, read);
+                ReportProgress();
+            }
+
+            fileStream.Position = 0;
+            return fileStream;
+        }
+        catch
+        {
+            fileStream?.Dispose();
+            if (TempFilePath != null && File.Exists(TempFilePath))
+            {
+                try { File.Delete(TempFilePath); } catch { /* Ignore deletion errors */ }
+            }
+            throw;
+        }
     }
 
     private void ReportProgress()
