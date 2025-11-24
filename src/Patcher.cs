@@ -43,6 +43,9 @@ static class Patcher
 
     static public void UnpackAndPatch(Stream downloaded, string directory)
     {
+        // Normalize the target directory for security validation
+        string normalizedDirectory = Path.GetFullPath(directory);
+
         using ZipArchive archive = new ZipArchive(downloaded, ZipArchiveMode.Read, leaveOpen: true);
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
@@ -50,8 +53,15 @@ static class Patcher
             if (String.IsNullOrWhiteSpace(entryPath) || entryPath.EndsWith('/') || !entryPath.StartsWith(Constants.PatchDirectory, StringComparison.OrdinalIgnoreCase)) continue;
             entryPath = entry.FullName.Substring(Constants.PatchDirectory.Length);
             entryPath = Path.Join(entryPath.Split('/'));
-            entryPath = Path.Join(directory, entryPath);
-            string? entryDirectory = Path.GetDirectoryName(entryPath)!;
+            entryPath = Path.GetFullPath(Path.Join(directory, entryPath));
+
+            // Security check: Prevent path traversal attacks
+            if (!entryPath.StartsWith(normalizedDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException($"Archive entry attempts to write outside target directory: {entry.FullName}");
+            }
+
+            string entryDirectory = Path.GetDirectoryName(entryPath)!;
             Directory.CreateDirectory(entryDirectory);
             using (FileStream fileStream = new(entryPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
