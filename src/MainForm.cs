@@ -12,6 +12,7 @@ public class MainForm : Form
     private OperationPanel operationPanel = null!;
     private bool isOperationInProgress = false;
     private FileStream? cachedPatchFile = null;
+    private string? cachedPatchFilePath = null;
     private string? cachedSourceUrl = null;
 
     public MainForm()
@@ -24,10 +25,29 @@ public class MainForm : Form
     {
         if (disposing)
         {
-            cachedPatchFile?.Dispose();
-            cachedPatchFile = null;
+            CleanupCachedFile();
         }
         base.Dispose(disposing);
+    }
+
+    private void CleanupCachedFile()
+    {
+        cachedPatchFile?.Dispose();
+        cachedPatchFile = null;
+
+        if (cachedPatchFilePath != null && File.Exists(cachedPatchFilePath))
+        {
+            try
+            {
+                File.Delete(cachedPatchFilePath);
+            }
+            catch
+            {
+                // Ignore deletion errors
+            }
+        }
+        cachedPatchFilePath = null;
+        cachedSourceUrl = null;
     }
 
     private void InitializeComponent()
@@ -156,8 +176,7 @@ public class MainForm : Form
             if (cachedPatchFile == null || cachedSourceUrl != source.url)
             {
                 // Clean up old cached file if exists
-                cachedPatchFile?.Dispose();
-                cachedPatchFile = null;
+                CleanupCachedFile();
 
                 operationPanel.LabelText = "Downloading...";
                 Downloader downloader = new Downloader(source.url);
@@ -167,6 +186,7 @@ public class MainForm : Form
                     operationPanel.UpdateProgress(progress, "Downloading...");
                 };
                 cachedPatchFile = await downloader.Download();
+                cachedPatchFilePath = downloader.TempFilePath;
                 cachedSourceUrl = source.url;
             }
 
@@ -181,9 +201,7 @@ public class MainForm : Form
             MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Clean up cached file after successful patch
-            cachedPatchFile.Dispose();
-            cachedPatchFile = null;
-            cachedSourceUrl = null;
+            CleanupCachedFile();
         }
         catch (IOException)
         {
@@ -216,9 +234,7 @@ public class MainForm : Form
             MessageBox.Show(this, message, "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Error downloading patch.";
             // Network error during download - discard cached file
-            cachedPatchFile?.Dispose();
-            cachedPatchFile = null;
-            cachedSourceUrl = null;
+            CleanupCachedFile();
         }
         catch (InvalidDataException)
         {
@@ -226,9 +242,7 @@ public class MainForm : Form
             MessageBox.Show(this, message, "Invalid Patch File", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Error: Invalid patch file.";
             // Invalid file - discard it and force re-download
-            cachedPatchFile?.Dispose();
-            cachedPatchFile = null;
-            cachedSourceUrl = null;
+            CleanupCachedFile();
         }
         catch (Exception ex)
         {

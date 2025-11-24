@@ -19,6 +19,11 @@ public class Downloader
     /// </summary>
     public int Progress { get; private set; }
 
+    /// <summary>
+    /// Gets the path to the temporary file created by the last Download() call
+    /// </summary>
+    public string? TempFilePath { get; private set; }
+
     private int lastPercent;
     private readonly string url;
     private long downloaded;
@@ -38,8 +43,10 @@ public class Downloader
     /// </summary>
     /// <returns>
     /// A FileStream containing the downloaded content with position reset to 0.
-    /// The file is created in the system's temporary directory and will be deleted when the stream is disposed.
-    /// IMPORTANT: The caller is responsible for disposing the returned FileStream.
+    /// The file is created in the system's temporary directory.
+    /// IMPORTANT: The caller is responsible for:
+    /// 1. Disposing the returned FileStream
+    /// 2. Deleting the temporary file (path available in TempFilePath property)
     /// </returns>
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails</exception>
     async public Task<FileStream> Download()
@@ -49,15 +56,14 @@ public class Downloader
         response.EnsureSuccessStatusCode();
         length = response.Content.Headers.ContentLength ?? -1L;
 
-        // Create a temporary file that will be deleted when the FileStream is disposed
-        string tempFile = Path.GetTempFileName();
+        // Create a temporary file
+        TempFilePath = Path.GetTempFileName();
         FileStream fileStream = new FileStream(
-            tempFile,
+            TempFilePath,
             FileMode.Create,
             FileAccess.ReadWrite,
             FileShare.None,
-            Constants.DownloadBufferSize,
-            FileOptions.DeleteOnClose);
+            Constants.DownloadBufferSize);
 
         using var stream = await response.Content.ReadAsStreamAsync();
         byte[] buffer = new byte[Constants.DownloadBufferSize];
