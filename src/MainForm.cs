@@ -190,6 +190,11 @@ public class MainForm : Form
             string message = "There was an error patching your game. Please make sure Hearthstone is closed and try again.";
             MessageBox.Show(this, message, "Patching Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Error during patching.";
+            // Reset file position for retry
+            if (cachedPatchFile != null)
+            {
+                cachedPatchFile.Position = 0;
+            }
         }
         catch (UnauthorizedAccessException)
         {
@@ -199,18 +204,31 @@ public class MainForm : Form
                            "• Try running this program as Administrator";
             MessageBox.Show(this, message, "Permission Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Error: Permission denied.";
+            // Reset file position for retry
+            if (cachedPatchFile != null)
+            {
+                cachedPatchFile.Position = 0;
+            }
         }
         catch (System.Net.Http.HttpRequestException)
         {
             string message = "Failed to download the patch. Please check your internet connection and try again.";
             MessageBox.Show(this, message, "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Error downloading patch.";
+            // Network error during download - discard cached file
+            cachedPatchFile?.Dispose();
+            cachedPatchFile = null;
+            cachedSourceUrl = null;
         }
         catch (InvalidDataException)
         {
             string message = "The downloaded patch file is invalid or corrupted. Please try again.";
             MessageBox.Show(this, message, "Invalid Patch File", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Error: Invalid patch file.";
+            // Invalid file - discard it and force re-download
+            cachedPatchFile?.Dispose();
+            cachedPatchFile = null;
+            cachedSourceUrl = null;
         }
         catch (Exception ex)
         {
@@ -218,6 +236,11 @@ public class MainForm : Form
                            $"If the problem persists, please report this error:\n{ex.Message}";
             MessageBox.Show(this, message, "Unexpected Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             operationPanel.LabelText = "Unexpected error occurred.";
+            // Reset file position for retry
+            if (cachedPatchFile != null)
+            {
+                cachedPatchFile.Position = 0;
+            }
         }
         finally
         {
