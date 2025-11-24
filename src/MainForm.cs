@@ -18,7 +18,7 @@ public class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
-        LoadChannelsAsync();
+        _ = LoadChannelsAsync(); // Fire and forget with explicit discard
     }
 
     protected override void Dispose(bool disposing)
@@ -264,20 +264,28 @@ public class MainForm : Form
         }
     }
 
-    private async void LoadChannelsAsync()
+    private async Task LoadChannelsAsync()
     {
-        bool success = await SourceManager.LoadChannelsAsync();
-
-        if (success && cmbChannels != null)
+        try
         {
-            if (cmbChannels.InvokeRequired)
+            bool success = await SourceManager.LoadChannelsAsync();
+
+            if (success && cmbChannels != null)
             {
-                cmbChannels.Invoke(new Action(() => PopulateChannels()));
+                if (cmbChannels.InvokeRequired)
+                {
+                    cmbChannels.Invoke(new Action(() => PopulateChannels()));
+                }
+                else
+                {
+                    PopulateChannels();
+                }
             }
-            else
-            {
-                PopulateChannels();
-            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't crash - fallback sources will be used
+            System.Diagnostics.Debug.WriteLine($"Failed to load channels: {ex.Message}");
         }
     }
 
