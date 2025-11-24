@@ -54,6 +54,10 @@ public class LatestRelease
 
 public static class SourceManager
 {
+    private static readonly HttpClient _httpClient = new HttpClient
+    {
+        Timeout = TimeSpan.FromSeconds(Constants.ApiTimeoutSeconds)
+    };
 
     private static Source[] FallbackSources = new Source[]
     {
@@ -66,10 +70,7 @@ public static class SourceManager
     {
         try
         {
-            using HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(Constants.ApiTimeoutSeconds);
-
-            string json = await client.GetStringAsync(Constants.ApiEndpoint);
+            string json = await _httpClient.GetStringAsync(Constants.ApiEndpoint);
             var channels = JsonSerializer.Deserialize<ReleaseChannel[]>(json);
 
             if (channels == null || channels.Length == 0)

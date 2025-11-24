@@ -9,6 +9,8 @@ namespace HearthstoneAccessPatcher;
 /// </summary>
 public class Downloader
 {
+    private static readonly HttpClient _httpClient = new HttpClient();
+
     /// <summary>
     /// Event raised when download progress changes. The integer parameter represents the progress percentage (0-100).
     /// </summary>
@@ -51,8 +53,7 @@ public class Downloader
     /// <exception cref="HttpRequestException">Thrown when the HTTP request fails</exception>
     async public Task<FileStream> Download()
     {
-        using HttpClient client = new HttpClient();
-        using HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+        using HttpResponseMessage response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         length = response.Content.Headers.ContentLength ?? -1L;
 
