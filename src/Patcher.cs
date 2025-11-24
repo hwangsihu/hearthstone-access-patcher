@@ -43,7 +43,7 @@ static class Patcher
 
     static public void UnpackAndPatch(Stream downloaded, string directory)
     {
-        using ZipArchive archive = new ZipArchive(downloaded, ZipArchiveMode.Read, false);
+        using ZipArchive archive = new ZipArchive(downloaded, ZipArchiveMode.Read, leaveOpen: true);
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             string entryPath = entry.FullName;
