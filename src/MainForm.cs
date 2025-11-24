@@ -10,11 +10,24 @@ public class MainForm : Form
     private Button btnStart = null!;
     private FlowLayoutPanel mainPanel = null!;
     private OperationPanel operationPanel = null!;
+    private bool isOperationInProgress = false;
+    private FileStream? cachedPatchFile = null;
+    private string? cachedSourceUrl = null;
 
     public MainForm()
     {
         InitializeComponent();
         LoadChannelsAsync();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            cachedPatchFile?.Dispose();
+            cachedPatchFile = null;
+        }
+        base.Dispose(disposing);
     }
 
     private void InitializeComponent()
@@ -113,6 +126,12 @@ public class MainForm : Form
 
     private async void BtnStart_Click(object? sender, EventArgs e)
     {
+        // Prevent multiple operations from running simultaneously
+        if (isOperationInProgress)
+        {
+            return;
+        }
+
         string directory = directoryBox.Text;
         if (!Patcher.IsHsDirectory(directory))
         {
@@ -127,25 +146,44 @@ public class MainForm : Form
         }
         Source source = SourceManager.Sources[cmbChannels.SelectedIndex];
 
-        // Disable Start button to prevent multiple clicks
-        btnStart.Enabled = false;
+        // Mark operation as in progress
+        isOperationInProgress = true;
+        btnStart.Text = "Patching...";
 
         try
         {
-            operationPanel.LabelText = "Downloading...";
-            Downloader downloader = new Downloader(source.url);
-
-            downloader.ProgressChanged += (sender, progress) =>
+            // Check if we need to download (first time or different source)
+            if (cachedPatchFile == null || cachedSourceUrl != source.url)
             {
-                operationPanel.UpdateProgress(progress, "Downloading...");
-            };
-            using Stream stream = await downloader.Download();
+                // Clean up old cached file if exists
+                cachedPatchFile?.Dispose();
+                cachedPatchFile = null;
+
+                operationPanel.LabelText = "Downloading...";
+                Downloader downloader = new Downloader(source.url);
+
+                downloader.ProgressChanged += (sender, progress) =>
+                {
+                    operationPanel.UpdateProgress(progress, "Downloading...");
+                };
+                cachedPatchFile = await downloader.Download();
+                cachedSourceUrl = source.url;
+            }
+
             operationPanel.LabelText = "Patching...";
             await Task.Yield();
-            Patcher.UnpackAndPatch(stream, directory);
+
+            // Reset position to start of file for patching
+            cachedPatchFile.Position = 0;
+            Patcher.UnpackAndPatch(cachedPatchFile, directory);
 
             operationPanel.LabelText = "Done.";
             MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // Clean up cached file after successful patch
+            cachedPatchFile.Dispose();
+            cachedPatchFile = null;
+            cachedSourceUrl = null;
         }
         catch (IOException)
         {
@@ -183,8 +221,9 @@ public class MainForm : Form
         }
         finally
         {
-            // Re-enable Start button
-            btnStart.Enabled = true;
+            // Reset button state
+            isOperationInProgress = false;
+            btnStart.Text = "Start";
         }
     }
 
