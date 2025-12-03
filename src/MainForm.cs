@@ -1,16 +1,24 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 namespace HearthstoneAccessPatcher;
 public class MainForm : Form
 {
+    [DllImport("user32.dll")]
+    private static extern void NotifyWinEvent(uint eventType, IntPtr hwnd, int idObject, int idChild);
+
+    private const uint EVENT_OBJECT_STATECHANGE = 0x800A;
+    private const int OBJID_CLIENT = -4;
+
     private TextBox directoryBox = null!;
     private ComboBox cmbChannels = null!;
     private Button btnStart = null!;
     private Button btnExit = null!;
     private FlowLayoutPanel mainPanel = null!;
     private OperationPanel operationPanel = null!;
+    private CheckBox chkPlaceChangelogOnDesktop = null!;
     private bool isOperationInProgress = false;
     private FileStream? cachedPatchFile = null;
     private string? cachedPatchFilePath = null;
@@ -124,6 +132,25 @@ public class MainForm : Form
         comboPanel.Controls.Add(lblSelect);
         comboPanel.Controls.Add(cmbChannels);
 
+        mainPanel.Controls.Add(comboPanel);
+
+        // Add checkbox for placing changelog on desktop
+        chkPlaceChangelogOnDesktop = new CheckBox
+        {
+            Text = "Place changelog on desktop",
+            AutoSize = true,
+            Checked = false,
+            Margin = new Padding(0, 5, 0, 0),
+            AccessibleName = "Place changelog on desktop",
+            AccessibleRole = AccessibleRole.CheckButton
+        };
+        chkPlaceChangelogOnDesktop.CheckedChanged += (s, e) =>
+        {
+            // Notify screen readers of state change
+            NotifyWinEvent(EVENT_OBJECT_STATECHANGE, chkPlaceChangelogOnDesktop.Handle, OBJID_CLIENT, 0);
+        };
+        mainPanel.Controls.Add(chkPlaceChangelogOnDesktop);
+
         FlowLayoutPanel buttonPanel = new FlowLayoutPanel();
         buttonPanel.FlowDirection = FlowDirection.LeftToRight;
         buttonPanel.AutoSize = true;
@@ -142,7 +169,6 @@ public class MainForm : Form
         buttonPanel.Controls.Add(btnStart);
         buttonPanel.Controls.Add(btnExit);
 
-        mainPanel.Controls.Add(comboPanel);
         mainPanel.Controls.Add(buttonPanel);
         operationPanel = new OperationPanel();
 
@@ -206,11 +232,11 @@ public class MainForm : Form
             }
 
             operationPanel.LabelText = "Patching...";
-            await Task.Yield();
 
             // Reset position to start of file for patching
             cachedPatchFile.Position = 0;
-            Patcher.UnpackAndPatch(cachedPatchFile, directory);
+            bool placeChangelog = chkPlaceChangelogOnDesktop.Checked;
+            await Task.Run(() => Patcher.UnpackAndPatch(cachedPatchFile, directory, placeChangelog));
 
             operationPanel.LabelText = "Done.";
             MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
