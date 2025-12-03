@@ -105,7 +105,17 @@ public class MainForm : Form
                 dialog.UseDescriptionForTitle = true;
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    directoryBox.Text = dialog.SelectedPath;
+                    string selectedPath = dialog.SelectedPath;
+                    if (Patcher.IsHsDirectory(selectedPath))
+                    {
+                        directoryBox.Text = selectedPath;
+                        // Persist the custom directory to environment variable for user
+                        Environment.SetEnvironmentVariable("HEARTHSTONE_HOME", selectedPath, EnvironmentVariableTarget.User);
+                    }
+                    else
+                    {
+                        MessageBox.Show(this, "The selected folder is not a valid Hearthstone installation directory.", "Invalid Directory", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
         };
@@ -243,6 +253,10 @@ public class MainForm : Form
             await Task.Run(() => Patcher.UnpackAndPatch(cachedPatchFile, directory, placeChangelog));
 
             operationPanel.LabelText = "Done.";
+
+            // Persist the directory to environment variable for user after successful patch
+            Environment.SetEnvironmentVariable("HEARTHSTONE_HOME", directory, EnvironmentVariableTarget.User);
+
             MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Clean up cached file after successful patch
