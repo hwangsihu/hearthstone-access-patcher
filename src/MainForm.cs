@@ -50,9 +50,13 @@ public class MainForm : Form
             {
                 File.Delete(cachedPatchFilePath);
             }
-            catch
+            catch (IOException)
             {
-                // Ignore deletion errors
+                // Ignore file deletion errors - file may be locked or already deleted
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Ignore permission errors during cleanup
             }
         }
         cachedPatchFilePath = null;
