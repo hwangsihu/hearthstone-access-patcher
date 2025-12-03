@@ -68,7 +68,7 @@ static class Patcher
                 continue;
             }
 
-            if (String.IsNullOrWhiteSpace(entryPath) || entryPath.EndsWith('/') || !entryPath.StartsWith(Constants.PatchDirectory, StringComparison.OrdinalIgnoreCase)) continue;
+            if (string.IsNullOrWhiteSpace(entryPath) || entryPath.EndsWith('/') || !entryPath.StartsWith(Constants.PatchDirectory, StringComparison.OrdinalIgnoreCase)) continue;
             entryPath = entry.FullName.Substring(Constants.PatchDirectory.Length);
             entryPath = Path.Join(entryPath.Split('/'));
             entryPath = Path.GetFullPath(Path.Join(directory, entryPath));
