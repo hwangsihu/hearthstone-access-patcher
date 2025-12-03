@@ -107,8 +107,4 @@ public class Downloader
             lastPercent = percent;
         }
     }
-
-
-
-
 }
