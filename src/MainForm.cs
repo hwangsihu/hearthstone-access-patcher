@@ -202,7 +202,7 @@ public class MainForm : Form
 
         if (cmbChannels.SelectedIndex < 0)
         {
-            MessageBox.Show(this, "No release channel is  selected. Please select a channel.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(this, "No release channel is selected. Please select a channel.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
         Source source = SourceManager.Sources[cmbChannels.SelectedIndex];
