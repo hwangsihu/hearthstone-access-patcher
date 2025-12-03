@@ -1,6 +1,8 @@
 # HearthstoneAccess Patcher
 An application that automates patching Hearthstone using the [HearthstoneAccess Community Patch](https://www.hearthstoneaccess.com/)
 
+Last Updated: Wednesday, December 3, 2025
+
 ## Overview
 This app (referred to as the patcher) performs the following tasks:
 * Downloads the zipped archive of the HearthstoneAccess Community Patch
