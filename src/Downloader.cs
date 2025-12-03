@@ -87,7 +87,18 @@ public class Downloader
             fileStream?.Dispose();
             if (TempFilePath != null && File.Exists(TempFilePath))
             {
-                try { File.Delete(TempFilePath); } catch { /* Ignore deletion errors */ }
+                try
+                {
+                    File.Delete(TempFilePath);
+                }
+                catch (IOException)
+                {
+                    // Ignore file deletion errors - file may be locked or already deleted
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Ignore permission errors during cleanup
+                }
             }
             throw;
         }
