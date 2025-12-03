@@ -9,13 +9,55 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
-    <PlatformTarget>x86</PlatformTarget>
-    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <!-- Globalization settings to reduce size -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- Remove satellite assemblies (language resources) to save ~7-8 MB -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DebugType>none</DebugType>
     <DebuggerSupport>false</DebuggerSupport>
   </PropertyGroup>
+
+  <!-- Exclude unnecessary assemblies from publish to reduce size -->
+  <Target Name="RemoveUnnecessaryAssemblies" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <!-- Remove design-time assemblies (~5.7 MB) -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(FileName)').Contains('Design'))" />
+
+      <!-- Remove debugging symbols (~1.9 MB) -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(FileName)').Contains('DiaSymReader'))" />
+
+      <!-- Remove mscordaccore files (~3.6 MB) - debugging/diagnostic tools -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(FileName)').Contains('mscordac'))" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(FileName)').Contains('mscordbi'))" />
+
+      <!-- Remove unused framework assemblies -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'Microsoft.VisualBasic.Core'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.DirectoryServices'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Data.Common'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Private.DataContractSerialization'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Linq.AsyncEnumerable'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'Microsoft.CSharp'" />
+
+      <!-- Remove Configuration assemblies (~1 MB) -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Configuration.ConfigurationManager'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Configuration'" />
+
+      <!-- Remove Diagnostics assemblies (~2-3 MB) -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Diagnostics.EventLog'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Diagnostics.EventLog.Messages'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Diagnostics.PerformanceCounter'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Diagnostics.TraceSource'" />
+
+      <!-- Remove Reflection.Metadata (~1.2 MB) -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(FileName)' == 'System.Reflection.Metadata'" />
+    </ItemGroup>
+  </Target>
 
 </Project>
