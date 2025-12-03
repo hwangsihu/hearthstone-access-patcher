@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 namespace HearthstoneAccessPatcher;
@@ -20,22 +20,22 @@ static class Program
 
     private static void HandleDomainException(object sender, UnhandledExceptionEventArgs e)
     {
-        logException((Exception)e.ExceptionObject);
+        LogException((Exception)e.ExceptionObject);
         Application.Exit();
     }
 
     private static void HandleThreadException(object sender, ThreadExceptionEventArgs e)
     {
-        logException(e.Exception);
+        LogException(e.Exception);
         Application.Exit();
     }
 
-    private static void logException(Exception ex)
+    private static void LogException(Exception ex)
     {
-        string filePath = "errors.log";
+        string filePath = Constants.ErrorLogFile;
         using (StreamWriter writer = new(filePath, false))
         {
-            writer.WriteLine($"Date : {DateTime.Now.ToString()}");
+            writer.WriteLine($"Date : {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}");
             Exception? ex_chain = ex;
             while (ex_chain != null)
             {

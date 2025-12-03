@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -53,7 +54,10 @@ public class LatestRelease
 
 public static class SourceManager
 {
-    private const string API_ENDPOINT = "https://hearthstoneaccess.com/api/v1/release-channels";
+    private static readonly HttpClient _httpClient = new HttpClient
+    {
+        Timeout = TimeSpan.FromSeconds(Constants.ApiTimeoutSeconds)
+    };
 
     private static Source[] FallbackSources = new Source[]
     {
@@ -66,10 +70,7 @@ public static class SourceManager
     {
         try
         {
-            using HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromSeconds(10);
-
-            string json = await client.GetStringAsync(API_ENDPOINT);
+            string json = await _httpClient.GetStringAsync(Constants.ApiEndpoint);
             var channels = JsonSerializer.Deserialize<ReleaseChannel[]>(json);
 
             if (channels == null || channels.Length == 0)
@@ -98,8 +99,11 @@ public static class SourceManager
 
             return false;
         }
-        catch
+        catch (Exception ex)
         {
+            // Log the exception for debugging purposes
+            Debug.WriteLine($"Failed to load channels from API: {ex.GetType().Name} - {ex.Message}");
+            // Fallback sources will be used automatically since Sources is already initialized to FallbackSources
             return false;
         }
     }

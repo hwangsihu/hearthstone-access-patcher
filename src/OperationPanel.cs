@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Windows.Forms.Automation;
@@ -8,13 +7,9 @@ public class OperationPanel : FlowLayoutPanel
 {
     private ProgressBar progressBar;
     private Label label;
-    private ListBox listBox;
-    private List<string> historyItems;
 
     public OperationPanel()
     {
-        historyItems = new List<string>();
-
         this.FlowDirection = FlowDirection.TopDown;
         this.AutoSize = true;
         this.WrapContents = false;
@@ -28,38 +23,12 @@ public class OperationPanel : FlowLayoutPanel
         label = new Label
         {
             Text = "Operation Status",
-            AutoSize = true
+            AutoSize = true,
+            Visible = false  // Hidden - status announced via automation notifications only
         };
-
-        listBox = new ListBox
-        {
-            Width = 200,
-            Height = 100
-        };
-
-        listBox.DataSource = historyItems;
 
         this.Controls.Add(progressBar);
         this.Controls.Add(label);
-        this.Controls.Add(listBox);
-
-        UpdateVisibility();
-    }
-
-    public void AddHistoryItem(string item)
-    {
-        historyItems.Add(item);
-        listBox.DataSource = null;
-        listBox.DataSource = historyItems;
-        UpdateVisibility();
-    }
-
-    public void ClearHistory()
-    {
-        historyItems.Clear();
-        listBox.DataSource = null;
-        listBox.DataSource = historyItems;
-        UpdateVisibility();
     }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -78,35 +47,28 @@ public class OperationPanel : FlowLayoutPanel
             {
                 label.Text = value;
                 label.AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.Other, AutomationNotificationProcessing.ImportantMostRecent, value);
-                AddHistoryItem(value);
             }
         }
     }
 
-    public List<string> HistoryItems
-    {
-        get { return historyItems; }
-    }
-
     public void UpdateProgress(int progressValue, string? text = null)
     {
+        if (InvokeRequired)
+        {
+            Invoke(new Action(() => UpdateProgress(progressValue, text)));
+            return;
+        }
+
         if (text != null)
         {
             LabelText = text;
         }
-        if (progressValue != progressBar.Value)
-        {
-            progressBar.Value = progressValue;
-        }
 
-    }
-
-    private void UpdateVisibility()
-    {
-        bool shouldBeVisible = historyItems.Count > 0;
-        if (this.Visible != shouldBeVisible)
+        // Clamp progress value to valid range
+        int clampedValue = Math.Clamp(progressValue, progressBar.Minimum, progressBar.Maximum);
+        if (clampedValue != progressBar.Value)
         {
-            this.Visible = shouldBeVisible;
+            progressBar.Value = clampedValue;
         }
     }
 }
