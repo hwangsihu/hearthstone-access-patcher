@@ -16,24 +16,32 @@ static class Patcher
         return false;
     }
 
+    private static string ConfigFilePath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "HearthstoneAccessPatcher",
+        "hearthstone_path.txt"
+    );
+
+    public static void SaveHearthstonePath(string path)
+    {
+        string dir = Path.GetDirectoryName(ConfigFilePath)!;
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(ConfigFilePath, path);
+    }
+
     public static string? LocateHearthstone()
     {
-        string? path = Environment.GetEnvironmentVariable("HEARTHSTONE_HOME");
-        if (path != null && IsHsDirectory(path))
+        if (File.Exists(ConfigFilePath))
         {
-            return Path.GetFullPath(path);
-        }
-        string programFiles;
-        if (Environment.Is64BitOperatingSystem)
-        {
-            programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-        }
-        else
-        {
-            programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            string? saved = File.ReadAllText(ConfigFilePath).Trim();
+            if (IsHsDirectory(saved))
+                return Path.GetFullPath(saved);
         }
 
-        path = Path.Combine(programFiles, "Hearthstone");
+        string programFiles = Environment.Is64BitOperatingSystem
+            ? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+            : Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        string path = Path.Combine(programFiles, "Hearthstone");
         if (IsHsDirectory(path))
         {
             return path;

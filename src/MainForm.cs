@@ -109,8 +109,7 @@ public class MainForm : Form
                     if (Patcher.IsHsDirectory(selectedPath))
                     {
                         directoryBox.Text = selectedPath;
-                        // Persist the custom directory to environment variable for user
-                        Environment.SetEnvironmentVariable("HEARTHSTONE_HOME", selectedPath, EnvironmentVariableTarget.User);
+                        Patcher.SaveHearthstonePath(selectedPath);
                     }
                     else
                     {
@@ -253,10 +252,7 @@ public class MainForm : Form
             await Task.Run(() => Patcher.UnpackAndPatch(cachedPatchFile, directory, placeChangelog));
 
             operationPanel.LabelText = "Done.";
-
-            // Persist the directory to environment variable for user after successful patch
-            Environment.SetEnvironmentVariable("HEARTHSTONE_HOME", directory, EnvironmentVariableTarget.User);
-
+            Patcher.SaveHearthstonePath(directory);
             MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Clean up cached file after successful patch
