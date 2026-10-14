@@ -22,7 +22,7 @@ public class OperationPanel : FlowLayoutPanel
 
         label = new Label
         {
-            Text = "Operation Status",
+            Text = "작업 상태",
             AutoSize = true,
             Visible = false  // Hidden - status announced via automation notifications only
         };

@@ -70,7 +70,7 @@ public class MainForm : Form
         btnExit = new Button();
         mainPanel = new FlowLayoutPanel();
 
-        this.Text = "HearthstoneAccessPatcher";
+        this.Text = "HearthstoneAccess 패처";
         this.Size = new System.Drawing.Size(600, 400);
         this.StartPosition = FormStartPosition.CenterScreen;
 
@@ -85,7 +85,7 @@ public class MainForm : Form
         pickerPanel.FlowDirection = FlowDirection.LeftToRight;
 
         Label lblPath = new Label();
-        lblPath.Text = "Select Folder:";
+        lblPath.Text = "폴더 선택:";
         lblPath.AutoSize = true;
 
         directoryBox = new TextBox();
@@ -93,13 +93,13 @@ public class MainForm : Form
         directoryBox.ReadOnly = true;
 
         Button btnBrowse = new Button();
-        btnBrowse.Text = "Browse for Folder...";
+        btnBrowse.Text = "폴더 찾아보기...";
         btnBrowse.AutoSize = true;
         btnBrowse.Click += (s, e) =>
         {
             using (FolderBrowserDialog dialog = new FolderBrowserDialog())
             {
-                dialog.Description = "Select the folder where Hearthstone is installed:";
+                dialog.Description = "하스스톤이 설치된 폴더를 선택하세요";
                 dialog.ShowNewFolderButton = false;
                 dialog.OkRequiresInteraction = true;
                 dialog.UseDescriptionForTitle = true;
@@ -113,7 +113,7 @@ public class MainForm : Form
                     }
                     else
                     {
-                        MessageBox.Show(this, "The selected folder is not a valid Hearthstone installation directory.", "Invalid Directory", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show(this, "선택한 폴더는 올바른 하스스톤 설치 폴더가 아닙니다.", "잘못된 폴더", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
             }
@@ -133,7 +133,7 @@ public class MainForm : Form
 
         Label lblSelect = new Label()
         {
-            Text = "Select Channel:",
+            Text = "채널 선택:",
             AutoSize = true,
         };
 
@@ -150,11 +150,11 @@ public class MainForm : Form
         // Add checkbox for placing changelog on desktop
         chkPlaceChangelogOnDesktop = new CheckBox
         {
-            Text = "Place changelog on desktop",
+            Text = "변경 내역을 바탕 화면에 저장",
             AutoSize = true,
             Checked = false,
             Margin = new Padding(0, 5, 0, 0),
-            AccessibleName = "Place changelog on desktop",
+            AccessibleName = "변경 내역을 바탕 화면에 저장",
             AccessibleRole = AccessibleRole.CheckButton
         };
         chkPlaceChangelogOnDesktop.CheckedChanged += (s, e) =>
@@ -170,11 +170,11 @@ public class MainForm : Form
         buttonPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
         buttonPanel.Margin = new Padding(0, 10, 0, 0); // Add top margin for spacing
 
-        btnStart.Text = "Patch Hearthstone";
+        btnStart.Text = "하스스톤 패치";
         btnStart.AutoSize = true;
         btnStart.Click += BtnStart_Click;
 
-        btnExit.Text = "Exit";
+        btnExit.Text = "종료";
         btnExit.AutoSize = true;
         btnExit.Margin = new Padding(5, 0, 0, 0); // Add left margin for spacing between buttons
         btnExit.Click += (s, e) => this.Close();
@@ -194,7 +194,7 @@ public class MainForm : Form
         }
         else
         {
-            MessageBox.Show(this, "Could not automatically locate where Hearthstone is installed to apply the patch. On the next screen, please press on the 'change' button and pick where you've installed Hearthstone by choosing the Hearthstone folder.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(this, "패치를 적용할 하스스톤 설치 위치를 자동으로 찾지 못했습니다. 다음 화면에서 '폴더 찾아보기...' 버튼을 눌러 하스스톤이 설치된 'Hearthstone' 폴더를 선택해 주세요.", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 
@@ -209,20 +209,20 @@ public class MainForm : Form
         string directory = directoryBox.Text;
         if (!Patcher.IsHsDirectory(directory))
         {
-            MessageBox.Show(this, "The provided path is not a valid directory to a hearthstone installation.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(this, "지정된 경로가 올바른 하스스톤 설치 폴더가 아닙니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
         if (cmbChannels.SelectedIndex < 0)
         {
-            MessageBox.Show(this, "No release channel is selected. Please select a channel.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(this, "릴리스 채널이 선택되지 않았습니다. 채널을 선택해 주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
         Source source = SourceManager.Sources[cmbChannels.SelectedIndex];
 
         // Mark operation as in progress
         isOperationInProgress = true;
-        btnStart.Text = "Patching Hearthstone...";
+        btnStart.Text = "하스스톤 패치 중...";
 
         try
         {
@@ -232,37 +232,37 @@ public class MainForm : Form
                 // Clean up old cached file if exists
                 CleanupCachedFile();
 
-                operationPanel.LabelText = "Downloading...";
+                operationPanel.LabelText = "다운로드 중...";
                 Downloader downloader = new Downloader(source.url);
 
                 downloader.ProgressChanged += (sender, progress) =>
                 {
-                    operationPanel.UpdateProgress(progress, "Downloading...");
+                    operationPanel.UpdateProgress(progress, "다운로드 중...");
                 };
                 cachedPatchFile = await downloader.Download();
                 cachedPatchFilePath = downloader.TempFilePath;
                 cachedSourceUrl = source.url;
             }
 
-            operationPanel.LabelText = "Patching...";
+            operationPanel.LabelText = "패치 중...";
 
             // Reset position to start of file for patching
             cachedPatchFile.Position = 0;
             bool placeChangelog = chkPlaceChangelogOnDesktop.Checked;
             await Task.Run(() => Patcher.UnpackAndPatch(cachedPatchFile, directory, placeChangelog));
 
-            operationPanel.LabelText = "Done.";
+            operationPanel.LabelText = "완료.";
             Patcher.SaveHearthstonePath(directory);
-            MessageBox.Show("Hearthstone patched successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("하스스톤 패치가 완료되었습니다!", "성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Clean up cached file after successful patch
             CleanupCachedFile();
         }
         catch (IOException)
         {
-            string message = "There was an error patching your game. Please make sure Hearthstone is closed and try again.";
-            MessageBox.Show(this, message, "Patching Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            operationPanel.LabelText = "Error during patching.";
+            string message = "게임을 패치하는 중 오류가 발생했습니다. 하스스톤이 종료되었는지 확인한 후 다시 시도해 주세요.";
+            MessageBox.Show(this, message, "패치 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            operationPanel.LabelText = "패치 중 오류가 발생했습니다.";
             // Reset file position for retry
             if (cachedPatchFile != null)
             {
@@ -271,12 +271,12 @@ public class MainForm : Form
         }
         catch (UnauthorizedAccessException)
         {
-            string message = "Permission denied while patching. Please make sure:\n\n" +
-                           "• Hearthstone is closed\n" +
-                           "• You have permission to write to the Hearthstone folder\n" +
-                           "• Try running this program as Administrator";
-            MessageBox.Show(this, message, "Permission Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            operationPanel.LabelText = "Error: Permission denied.";
+            string message = "패치하는 중 권한이 거부되었습니다. 다음 사항을 확인해 주세요.\n\n" +
+                           "• 하스스톤이 종료되어 있는지 확인하세요\n" +
+                           "• 하스스톤 폴더에 쓰기 권한이 있는지 확인하세요\n" +
+                           "• 이 프로그램을 관리자 권한으로 실행해 보세요";
+            MessageBox.Show(this, message, "권한 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            operationPanel.LabelText = "오류: 권한이 거부되었습니다.";
             // Reset file position for retry
             if (cachedPatchFile != null)
             {
@@ -285,26 +285,26 @@ public class MainForm : Form
         }
         catch (System.Net.Http.HttpRequestException)
         {
-            string message = "Failed to download the patch. Please check your internet connection and try again.";
-            MessageBox.Show(this, message, "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            operationPanel.LabelText = "Error downloading patch.";
+            string message = "패치를 다운로드하지 못했습니다. 인터넷 연결을 확인한 후 다시 시도해 주세요.";
+            MessageBox.Show(this, message, "다운로드 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            operationPanel.LabelText = "패치 다운로드 중 오류가 발생했습니다.";
             // Network error during download - discard cached file
             CleanupCachedFile();
         }
         catch (InvalidDataException)
         {
-            string message = "The downloaded patch file is invalid or corrupted. Please try again.";
-            MessageBox.Show(this, message, "Invalid Patch File", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            operationPanel.LabelText = "Error: Invalid patch file.";
+            string message = "다운로드한 패치 파일이 올바르지 않거나 손상되었습니다. 다시 시도해 주세요.";
+            MessageBox.Show(this, message, "잘못된 패치 파일", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            operationPanel.LabelText = "오류: 잘못된 패치 파일입니다.";
             // Invalid file - discard it and force re-download
             CleanupCachedFile();
         }
         catch (Exception ex)
         {
-            string message = "An unexpected error occurred while patching. Please try again.\n\n" +
-                           $"If the problem persists, please report this error:\n{ex.Message}";
-            MessageBox.Show(this, message, "Unexpected Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            operationPanel.LabelText = "Unexpected error occurred.";
+            string message = "패치하는 중 예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.\n\n" +
+                           $"문제가 계속되면 다음 오류를 제보해 주세요:\n{ex.Message}";
+            MessageBox.Show(this, message, "예기치 않은 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            operationPanel.LabelText = "예기치 않은 오류가 발생했습니다.";
             // Reset file position for retry
             if (cachedPatchFile != null)
             {
@@ -315,7 +315,7 @@ public class MainForm : Form
         {
             // Reset button state
             isOperationInProgress = false;
-            btnStart.Text = "Patch Hearthstone";
+            btnStart.Text = "하스스톤 패치";
         }
     }
 

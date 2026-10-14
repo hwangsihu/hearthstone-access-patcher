@@ -55,7 +55,7 @@ static class Program
                 ex_chain = ex_chain.InnerException;
             }
         }
-        MessageBox.Show($"A critical error has occurred\n{ex.Message}\nPlease check 'errors.log' for more details", "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show($"심각한 오류가 발생했습니다.\n{ex.Message}\n자세한 내용은 'errors.log' 파일을 확인해 주세요.", "심각한 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 
 }

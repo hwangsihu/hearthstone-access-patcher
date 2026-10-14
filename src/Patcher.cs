@@ -65,7 +65,7 @@ static class Patcher
                 if (placeChangelogOnDesktop)
                 {
                     string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    string changelogPath = Path.Combine(desktopPath, "HearthstoneAccess Changelog.md");
+                    string changelogPath = Path.Combine(desktopPath, "HearthstoneAccess 변경 내역.md");
 
                     using (Stream entryStream = entry.Open())
                     using (FileStream fileStream = new(changelogPath, FileMode.Create, FileAccess.Write, FileShare.None))
